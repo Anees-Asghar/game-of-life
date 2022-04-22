@@ -15,3 +15,5 @@ Conway's game of life implementation in Python.
         
   if you want to run the game of life with a random 20 x 20 board as initial state.
 	
+## Things to note
+- Each time the program is run using a random initial board state, the board state will be saved in the saved-states folder as "last-random-board". If you want to preserve that state for future use, rename it.
