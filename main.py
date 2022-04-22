@@ -37,7 +37,9 @@ def next_board_state(board):
         Return the next board state under the rules of the game, given the current
         board state.
     """
+    is_different = False
     next_state = []
+
     for r, row in enumerate(board):
         new_row = []
         for c, cell in enumerate(row):
@@ -45,14 +47,21 @@ def next_board_state(board):
             if cell == 1: # if live cell
                 # acording to the rules of game of life, the only case when a live cell 
                 # doesn't die off is when it has the right numbers of neighbors, i.e, 2 or 3
-                new_cell = 0 if count not in [2, 3] else 1
-                new_row.append(new_cell)
+                if count not in [2, 3]:
+                    new_row.append(0)
+                    is_different = True
+                else:
+                    new_row.append(1)
             else: # if dead cell
                 # dead cell becomes alive if the neighbor count is exactly 3
-                new_cell = 1 if count == 3 else 0
-                new_row.append(new_cell)
+                if count == 3:
+                    new_row.append(1)
+                    is_different = True
+                else:
+                    new_row.append(0)
         next_state.append(new_row)
-    return next_state
+    
+    return is_different, next_state
 
 
 def live_neighbor_count(board, cell_index):
@@ -90,11 +99,11 @@ def live_neighbor_count(board, cell_index):
     return live_count
 
 
-def save_board(board, filename="last_image"):
+def save_board(board, filename="last-random-board"):
     """
         Save board state in a file for later use.
     """
-    with open(f"saved_states/{filename}", 'w') as f:
+    with open(f"saved-states/{filename}", 'w') as f:
         lines = []
         for row in board:
             line = ''.join([str(i) for i in row])
@@ -108,7 +117,7 @@ def load_board(filename):
     """
     board = []
 
-    with open(f"saved_states/{filename}", 'r') as f:
+    with open(f"saved-states/{filename}", 'r') as f:
         lines = f.read().split('\n')
         for line in lines:
             row = [int(i) for i in line]
@@ -119,11 +128,11 @@ def load_board(filename):
 
 def main():
     """
-        Loads an initial board state and runs the game of life.
+        Load a board state and run the game of life.
     """
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1: # user has specified a saved board state
         board = load_board(filename=sys.argv[1])
-    else:
+    else: # generate random board
         board = random_board(20, 60)
         save_board(board)
 
@@ -133,7 +142,9 @@ def main():
         os.system(clear_cmd) # clear terminal
         render_board(board)
         time.sleep(SLEEP_TIME)
-        board = next_board_state(board) 
+        is_different, board = next_board_state(board) 
+
+        if not is_different: break # stop the program if there is no change in board state
 
 
 if __name__ == "__main__":
